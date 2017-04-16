@@ -3,6 +3,7 @@ namespace Crud\Listener;
 
 use Cake\Core\Plugin;
 use Cake\Event\Event;
+use Cake\ORM\Table;
 use RuntimeException;
 
 class SearchListener extends BaseListener
@@ -52,15 +53,15 @@ class SearchListener extends BaseListener
             return;
         }
 
-        $table = $this->_table();
-        if (!$table->behaviors()->hasMethod('filterParams')) {
+        $repository = $this->_table();
+        if ($repository instanceof Table && !$repository->behaviors()->hasMethod('filterParams')) {
             throw new RuntimeException(sprintf(
                 'Missing Search.Search behavior on %s',
-                get_class($table)
+                get_class($repository)
             ));
         }
 
-        $filterParams = $table->filterParams($this->_request()->query);
+        $filterParams = $repository->filterParams($this->_request()->query);
         $event->subject->query->find('search', $filterParams);
     }
 }
